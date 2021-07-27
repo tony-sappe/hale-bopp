@@ -1,13 +1,26 @@
-# Quasi-Enterprise JupyterHub deployment
+# Quasi-Enterprise JupyterHub Deployment
+
+This project enables an aspiring person to run an example "Science Platform" suitable for astrophysics research.
+If all you need is a local JupyterLab notebook with Python 3.7 and the amazing astronomy and processing libraries then this might be overkill.
+However, if you want to leverage more of an ecosystem around those components with JupyterHub then this can be a springboard to launch your own work.
+
+Spin-up a JupyterHub server with these features:
+* Reverse-Proxy
+* Industry-standard SSO Authentication
+* SQL database for persisting configurations and for SQL-based workflows
+* Mock S3 storage (future)
+* Full-suite of the common Python astrophysics & astronomical libraries
 
 Loosely based on the deployment in use at [Université de
 Versailles](https://jupyter.ens.uvsq.fr/) which is described in depth in [this blog
 post](https://opendreamkit.org/2018/10/17/jupyterhub-docker/).
 
 
-# List of All-🌟 Projects making this demonstration possible
-* Docker
-* Keycloak
+### List of All-🌟 Projects making this demonstration possible
+* [Docker]()
+* [Keycloak]()
+* [Python]()
+* [Postgres]()
 * [JupyterHub](https://jupyter.org/hub)
 
 

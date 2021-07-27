@@ -20,7 +20,22 @@ c.Spawner.default_url = "/lab"
 
 c.JupyterHub.authenticator_class = 'firstuseauthenticator.FirstUseAuthenticator'
 
+# # Authenticator
+# from jhub_cas_authenticator.cas_auth import CASAuthenticator
 
+# c.JupyterHub.authenticator_class = CASAuthenticator
+
+# # The CAS URLs to redirect (un)authenticated users to.
+# c.CASAuthenticator.cas_login_url = "https://<host>/login"
+# c.CASLocalAuthenticator.cas_logout_url = "https://<host>/logout"
+
+# # The CAS endpoint for validating service tickets.
+# c.CASAuthenticator.cas_service_validate_url = "https://<host>/serviceValidate"
+
+# # The service URL the CAS server will redirect the browser back to on successful authentication.
+# c.CASAuthenticator.cas_service_url = "https://%s/hub/login" % os.environ["HOST"]
+
+# c.Authenticator.admin_users = {"lucadefe"}
 
 
 # Docker spawner
