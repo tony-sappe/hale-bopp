@@ -1,0 +1,83 @@
+version: '3'
+
+services:
+  jupyterhub:
+    build: jupyterhub
+    image: jupyterhub_img
+    container_name: jupyterhub
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jupyterhub_data:/srv/jupyterhub
+    environment:
+      - DOCKER_JUPYTER_CONTAINER=jupyterlab_img
+      - DOCKER_NETWORK_NAME=${COMPOSE_PROJECT_NAME}_default
+      - HUB_IP=jupyterhub
+      - HOST
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:${HOST}"
+    restart: on-failure
+
+  jupyterlab:
+    build: jupyterlab
+    image: jupyterlab_img
+    container_name: jupyterlab
+    network_mode: none
+    command: echo
+
+  reverse-proxy:
+    image: traefik:1.7.30
+    container_name: reverse-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+      - "5432:5432"
+      - "8888:8888"
+      - "9990:9990"
+    volumes:
+      - ./reverse-proxy/traefik.toml:/etc/traefik/traefik.toml
+      - /etc/certs:/etc/certs
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: on-failure
+
+  # oauth2:
+  #   build: oauth2
+  #   image: oauth2_img
+  #   container_name: oauth2
+  #   ports:
+  #     - "8888:8080"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - keycloak_data:/srv/jupyterhub
+  #   environment:
+  #     - KEYCLOAK_USER=admin
+  #     - KEYCLOAK_PASSWORD=admin
+  #     - HOST
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.frontend.rule=Host:${HOST}"
+  #   restart: on-failure
+
+  database:
+    image: postgres:10.17-alpine
+    container_name: database
+    environment:
+      - USER=super
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=super1123
+      - HOST
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:${HOST}"
+    volumes:
+      - type: volume
+        source: database_date
+        target: /var/lib/postgresql/data
+
+
+volumes:
+  jupyterhub_data:
+  keycloak_data:
+  database_date:
+    driver: local
