@@ -1,21 +1,18 @@
-# JupyterHub deployment in use at Université de Versailles
+# Quasi-Enterprise JupyterHub deployment
 
-This is a [JupyterHub](https://jupyter.org/hub) deployment based on
-Docker currently in use at [Université de
-Versailles](https://jupyter.ens.uvsq.fr/).
+Loosely based on the deployment in use at [Université de
+Versailles](https://jupyter.ens.uvsq.fr/) which is described in depth in [this blog
+post](https://opendreamkit.org/2018/10/17/jupyterhub-docker/).
+
+
+# List of All-🌟 Projects making this demonstration possible
+* Docker
+* Keycloak
+* [JupyterHub](https://jupyter.org/hub)
+
 
 ## Features
 
-- Containerized single user Jupyter servers, using
-  [DockerSpawner](https://github.com/jupyterhub/dockerspawner);
-- Central authentication to the University CAS server;
-- User data persistence;
-- HTTPS proxy.
-
-## Learn more
-
-This deployment is described in depth in [this blog
-post](https://opendreamkit.org/2018/10/17/jupyterhub-docker/).
 
 ### Adapt to your needs
 
@@ -58,8 +55,3 @@ docker-compose up -d
 
 Read the [Docker Compose manual](https://docs.docker.com/compose/) to
 learn how to manage your application.
-
-## Acknowledgements
-
-<img src="https://opendreamkit.org/public/logos/Flag_of_Europe.svg" height="20"> Work partially funded by the EU H2020 project
-[OpenDreamKit](https://opendreamkit.org/).

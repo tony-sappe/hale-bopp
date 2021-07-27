@@ -15,7 +15,7 @@ USER root
 RUN mkdir -p /home/resources/keycloak/
 # COPY ./keycloak/ /opt/jboss/keycloak/
 
-# Sets up a realm with id "backend-service" in keycloak.  Two users (aiops & admin) are provided in the realm file.
+# Sets up a realm with id "backend-service" in keycloak.
 # CMD ["-b 0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled", "-Dkeycloak.import=/opt/jboss/keycloak/import-realm.json"]
 CMD ["-b 0.0.0.0"]
 USER jboss
