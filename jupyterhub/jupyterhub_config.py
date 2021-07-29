@@ -5,6 +5,10 @@
 #     docker volume rm jupyterhub_jupyterhub_data
 
 import os
+import sys
+
+from jupyter_client.localinterfaces import public_ips
+
 
 # Generic
 c.JupyterHub.admin_access = True
@@ -17,8 +21,9 @@ c.JupyterHub.authenticator_class = 'firstuseauthenticator.FirstUseAuthenticator'
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.DockerSpawner.image = os.environ["DOCKER_JUPYTER_CONTAINER"]
 c.DockerSpawner.network_name = os.environ["DOCKER_NETWORK_NAME"]
+c.DockerSpawner.extra_host_config = { 'network_mode': os.environ["DOCKER_NETWORK_NAME"] }
 # See https://github.com/jupyterhub/dockerspawner/blob/master/examples/oauth/jupyterhub_config.py
-c.JupyterHub.hub_ip = os.environ["HUB_IP"]
+c.JupyterHub.hub_ip = public_ips()[0]
 
 # user data persistence
 # see https://github.com/jupyterhub/dockerspawner#data-persistence-and-dockerspawner
@@ -34,8 +39,12 @@ c.Spawner.mem_limit = "10G"
 # Services
 c.JupyterHub.services = [
     {
-        "name": "cull_idle",
+        "name": "idle-culler",
         "admin": True,
-        "command": "python /srv/jupyterhub/cull_idle_servers.py --timeout=3600".split(),
+        "command": [
+            sys.executable,
+            "-m",
+            "jupyterhub_idle_culler",
+            "--timeout={}".format(os.environ["CONTAINER_IDLE_TIMEOUT"])],
     },
 ]

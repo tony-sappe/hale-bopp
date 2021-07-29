@@ -15,6 +15,7 @@ Loosely based on the deployment in use at [Université de
 Versailles](https://jupyter.ens.uvsq.fr/) which is described in depth in [this blog
 post](https://opendreamkit.org/2018/10/17/jupyterhub-docker/).
 
+Additionally look to the official [JupyterHub Docker Deploy](https://github.com/jupyterhub/jupyterhub-deploy-docker) for additional information.
 
 ### List of All-🌟 Projects making this demonstration possible
 * [Docker]()
