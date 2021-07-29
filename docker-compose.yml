@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 
 services:
   jupyterhub:
@@ -8,14 +8,16 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - jupyterhub_data:/srv/jupyterhub
+    # networks:
+    #   - default
     environment:
       - DOCKER_JUPYTER_CONTAINER=jupyterlab_img
       - DOCKER_NETWORK_NAME=${COMPOSE_PROJECT_NAME}_default
       - HUB_IP=jupyterhub
       - HOST
     labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:${HOST}"
+      # - "traefik.enable=true"
+      - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
     restart: on-failure
 
   jupyterlab:
@@ -26,18 +28,15 @@ services:
     command: echo
 
   reverse-proxy:
-    image: traefik:1.7.30
-    container_name: reverse-proxy
+    image: traefik:v2.4
+    container_name: reverse_proxy
+    # networks:
+    #   - default
+    command: --api.insecure=true --providers.docker
     ports:
       - "80:80"
-      - "443:443"
       - "8080:8080"
-      - "5432:5432"
-      - "8888:8888"
-      - "9990:9990"
     volumes:
-      - ./reverse-proxy/traefik.toml:/etc/traefik/traefik.toml
-      - /etc/certs:/etc/certs
       - /var/run/docker.sock:/var/run/docker.sock
     restart: on-failure
 
@@ -55,29 +54,36 @@ services:
   #     - KEYCLOAK_PASSWORD=admin
   #     - HOST
   #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.frontend.rule=Host:${HOST}"
+  #     - "traefik.http.routers.oauth2.rule=Host(`oauth2.docker.localhost`)"
   #   restart: on-failure
 
   database:
     image: postgres:10.17-alpine
-    container_name: database
+    container_name: db
     environment:
       - USER=super
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=super1123
       - HOST
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:${HOST}"
     volumes:
       - type: volume
-        source: database_date
+        source: database_data
         target: /var/lib/postgresql/data
+    # networks:
+    #   - backend
 
 
 volumes:
   jupyterhub_data:
-  keycloak_data:
-  database_date:
     driver: local
+  keycloak_data:
+    driver: local
+  database_data:
+    driver: local
+
+# networks:
+#   default:
+#     external: true
+#     name: jupyterhub-traefik-net
+#   backend:
+#     external: false

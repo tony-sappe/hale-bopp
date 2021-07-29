@@ -16,7 +16,7 @@ defaultEntryPoints = ["https","http"]
       keyFile = "/etc/certs/jupyter.ens.uvsq.fr.key"
 
 [docker]
-domain = "docker.local"
+domain = "docker.localhost"
 watch = true
 
 [api]
