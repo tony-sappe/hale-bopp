@@ -1,11 +1,8 @@
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-scipy-notebook
 FROM jupyter/scipy-notebook:f9c990eb6295
 
-LABEL maintainer="Tony Sappe"
-
 USER root
 
-# APT packages
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
@@ -23,7 +20,7 @@ RUN apt-get update \
 
 USER $NB_UID
 
-# Astrophysics Conda packages
+# Science Platform Conda packages
 
 RUN conda config --add channels conda-forge \
   && conda config --set channel_priority strict
@@ -33,10 +30,12 @@ RUN conda update --all
 RUN conda install --quiet --yes \
     'astropy' \
     'astroquery' \
+    'awscli' \
     'gammapy' \
     'gwcs' \
-    'matplotlib' \
     'photutils' \
+    'psycopg2' \
+    'pyspark' \
     'pyvo' \
     'reproject' \
     'specutils' \
@@ -44,7 +43,8 @@ RUN conda install --quiet --yes \
 RUN conda clean --all --yes \
     && fix-permissions $CONDA_DIR
 
-ENV CPATH=$CONDA_DIR/include
+ENV CPATH=$CONDA_DIR/include \
+    JAVA_HOME=/usr/bin/java
 
 RUN pip install \
     pari_jupyter \

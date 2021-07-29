@@ -13,9 +13,10 @@ services:
     environment:
       - DOCKER_JUPYTER_CONTAINER=jupyterlab_img
       - DOCKER_NETWORK_NAME=hale-bopp-network
-      - CONTAINER_IDLE_TIMEOUT=120
+      - CONTAINER_IDLE_TIMEOUT=600
       - HUB_IP=jupyterhub
       - HOST
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     labels:
       - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
     restart: on-failure
@@ -25,8 +26,12 @@ services:
     image: jupyterlab_img
     container_name: jupyterlab
     networks:
-      - hale-bopp-network
-      - hale-bopp-internal
+      hale-bopp-network:
+        priority: 10
+      hale-bopp-internal:
+        priority: 5
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     command: echo
 
   reverse-proxy:
@@ -63,9 +68,10 @@ services:
     image: postgres:10.17-alpine
     container_name: db
     environment:
-      - USER=super
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=super1123
+      - USER=${POSTGRES_USER}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
       - HOST
     volumes:
       - type: volume
@@ -88,3 +94,4 @@ networks:
     external: true
   hale-bopp-internal:
     external: false
+    name: hale-bopp-internal
