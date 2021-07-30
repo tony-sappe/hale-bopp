@@ -39,7 +39,8 @@ RUN conda install --quiet --yes \
     'pyvo' \
     'reproject' \
     'specutils' \
-    'vaex'
+    'vaex' \
+    'jupyterhub==1.4.2'
 RUN conda clean --all --yes \
     && fix-permissions $CONDA_DIR
 

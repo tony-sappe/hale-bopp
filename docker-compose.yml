@@ -7,7 +7,7 @@ services:
     container_name: jupyterhub
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - jupyterhub_data:/srv/jupyterhub
+      - data:/srv/jupyterhub
     networks:
       - hale-bopp-network
     environment:
@@ -17,21 +17,20 @@ services:
       - HUB_IP=jupyterhub
       - HOST
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
     labels:
       - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
     restart: on-failure
 
   jupyterlab:
+    # This service is really just to facilitate building the image with docker-compose build
+    # Don't waste time configuring the container here
     build: jupyterlab
     image: jupyterlab_img
     container_name: jupyterlab
-    networks:
-      hale-bopp-network:
-        priority: 10
-      hale-bopp-internal:
-        priority: 5
-    environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    network_mode: none
     command: echo
 
   reverse-proxy:
@@ -65,7 +64,7 @@ services:
   #   restart: on-failure
 
   database:
-    image: postgres:10.17-alpine
+    image: postgres:12.7-alpine
     container_name: db
     environment:
       - USER=${POSTGRES_USER}
@@ -78,11 +77,13 @@ services:
         source: database_data
         target: /var/lib/postgresql/data
     networks:
-      - hale-bopp-internal
+      - hale-bopp-network
 
 
 volumes:
-  jupyterhub_data:
+  data:
+    driver: local
+  lab_notebook_data:
     driver: local
   keycloak_data:
     driver: local
@@ -92,6 +93,3 @@ volumes:
 networks:
   hale-bopp-network:
     external: true
-  hale-bopp-internal:
-    external: false
-    name: hale-bopp-internal
