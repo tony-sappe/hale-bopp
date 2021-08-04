@@ -17,7 +17,6 @@ services:
       - HUB_IP=jupyterhub
       - HOST
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
     labels:
@@ -79,6 +78,21 @@ services:
     networks:
       - hale-bopp-network
 
+  # blob_store:
+  #   image: scality/s3server    #    adobe/s3mock:2.1.36
+  #   container_name: s3
+  #   environment:
+  #     - SCALITY_ACCESS_KEY_ID=$
+  #     - SCALITY_ACCESS_KEY=
+  #     - HOST
+  #   # volumes:
+  #   #   - type: volume
+  #   #     source: blob_data
+  #   #     target: /
+  #   networks:
+  #     - hale-bopp-network
+  #   ports:
+  #     - 8000:8000
 
 volumes:
   data:
@@ -89,6 +103,8 @@ volumes:
     driver: local
   database_data:
     driver: local
+  # blob_data:
+  #   driver: local
 
 networks:
   hale-bopp-network:

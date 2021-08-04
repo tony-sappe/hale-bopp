@@ -1,4 +1,7 @@
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-scipy-notebook
+
+# JupyterLab 3.0.16
+# Python 3.7.10
 FROM jupyter/scipy-notebook:f9c990eb6295
 
 USER root
@@ -33,6 +36,7 @@ RUN conda install --quiet --yes \
     'awscli' \
     'gammapy' \
     'gwcs' \
+    'nodejs' \
     'photutils' \
     'psycopg2' \
     'pyspark' \
@@ -49,6 +53,7 @@ ENV CPATH=$CONDA_DIR/include \
 
 RUN pip install \
     pari_jupyter \
+    jupyterlab-sql \
     scilab-kernel \
     && fix-permissions $CONDA_DIR
 

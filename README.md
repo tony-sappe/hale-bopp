@@ -60,12 +60,16 @@ Other changes you may like to make:
 
 ### Run!
 
-Once you are ready, build and launch the application with
+Once you are ready, build and launch the application with:
 
 ```
 docker-compose build
 docker-compose up -d
 ```
+Then navigate to [jupyterhub.docker.localhost](http://jupyterhub.docker.localhost/)
+(Google Chrome might work better than other browsers, YMMV)
+
+### More
 
 Read the [Docker Compose manual](https://docs.docker.com/compose/) to
 learn how to manage your application.

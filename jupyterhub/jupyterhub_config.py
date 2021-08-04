@@ -9,6 +9,11 @@ import sys
 
 from jupyter_client.localinterfaces import public_ips
 
+def construct_db_conn_string(spawner):
+    username = spawner.user.name
+    return f"postgres://{username}:{username}@{os.environ['POSTGRES_HOST']}:{os.environ['POSTGRES_PORT']}/{username}"
+
+
 # Reference Links
 #    https://jupyterhub-dockerspawner.readthedocs.io/en/latest/api/index.html
 #    https://jupyterhub.readthedocs.io/en/stable/api/app.html
@@ -19,14 +24,13 @@ c.Spawner.default_url = "/lab"
 c.JupyterHub.allow_named_servers = True
 c.JupyterHub.named_server_limit_per_user = 3
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
+c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely not desirable for production
 
 # Security
 c.JupyterHub.admin_access = True
 c.JupyterHub.authenticator_class = 'firstuseauthenticator.FirstUseAuthenticator'
 
-
-# Docker spawner
-
+# Docker Spawner
 c.DockerSpawner.image = os.environ["DOCKER_JUPYTER_CONTAINER"]
 c.DockerSpawner.prefix = "jupyterlab"
 c.DockerSpawner.name_template = "jupyterlab-{username}-notebooks-{servername}"
@@ -43,9 +47,8 @@ c.JupyterHub.hub_ip = public_ips()[0]
 # c.DockerSpawner.env_keep = ["DATABASE_URL"]  # This is an admin user, don't pass to notebook server
 c.DockerSpawner.environment = {
     # database_url = os.environ["DATABASE_URL"].format(os.environ)
-    "DATABASE_URL": "postgres://{JUPYTERHUB_USER}:{JUPYTERHUB_USER}@" + f"{os.environ['POSTGRES_HOST']}:{os.environ['POSTGRES_PORT']}/" + "{JUPYTERHUB_USER}"
+    "DATABASE_URL": construct_db_conn_string
 }
-# export DATABASE_URL=postgres://root:super1123@db:5432/hale_bopp
 
 # user data persistence
 # see https://github.com/jupyterhub/dockerspawner#data-persistence-and-dockerspawner
@@ -76,6 +79,11 @@ c.JupyterHub.services = [
 ]
 
 # Hooks
+def hook_runner(spawner):
+    database_init(spawner)
+    blobstore_init(spawner)
+
+
 def database_init(spawner):
     username = spawner.user.name
 
@@ -84,8 +92,8 @@ def database_init(spawner):
     create_user = f"CREATE USER {username} WITH PASSWORD '{username}'"
     check_db = f"SELECT * FROM pg_database WHERE datname = '{username}'"
     create_db = f"CREATE DATABASE {username} WITH OWNER = '{username}'"
-    # revoke_all = f"REVOKE ALL FROM {username}"
-    # grant_priv = f"GRANT ALL PRIVILEGES ON {username} TO {username}"
+    revoke_all = f"REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM {username}"
+    grant_priv = f"GRANT ALL PRIVILEGES ON DATABASE {username} TO {username}"
 
     import psycopg2
     connection = psycopg2.connect(dsn=os.environ["DATABASE_URL"])
@@ -97,7 +105,15 @@ def database_init(spawner):
     cursor.execute(check_db)
     if not cursor.fetchone():
         cursor.execute(create_db)
+    cursor.execute(revoke_all)
+    cursor.execute(grant_priv)
+
     connection.commit()
     connection.close()
 
-c.Spawner.pre_spawn_hook = database_init
+
+def blobstore_init(spawner):
+    username = spawner.user.name
+    pass
+
+c.Spawner.pre_spawn_hook = hook_runner
