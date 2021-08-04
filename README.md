@@ -15,6 +15,7 @@ Loosely based on the deployment in use at [Université de
 Versailles](https://jupyter.ens.uvsq.fr/) which is described in depth in [this blog
 post](https://opendreamkit.org/2018/10/17/jupyterhub-docker/).
 
+Additionally look to the official [JupyterHub Docker Deploy](https://github.com/jupyterhub/jupyterhub-deploy-docker) for additional information.
 
 ### List of All-🌟 Projects making this demonstration possible
 * [Docker]()
@@ -59,12 +60,16 @@ Other changes you may like to make:
 
 ### Run!
 
-Once you are ready, build and launch the application with
+Once you are ready, build and launch the application with:
 
 ```
 docker-compose build
 docker-compose up -d
 ```
+Then navigate to [jupyterhub.docker.localhost](http://jupyterhub.docker.localhost/)
+(Google Chrome might work better than other browsers, YMMV)
+
+### More
 
 Read the [Docker Compose manual](https://docs.docker.com/compose/) to
 learn how to manage your application.

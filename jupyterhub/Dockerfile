@@ -1,11 +1,12 @@
-FROM jupyterhub/jupyterhub:0.9.3
+FROM jupyterhub/jupyterhub:1.4.2
 
 COPY jupyterhub_config.py .
 
-RUN wget https://raw.githubusercontent.com/jupyterhub/jupyterhub/0.9.3/examples/cull-idle/cull_idle_servers.py
+RUN apt-get update && apt-get install -y postgresql-client-12
 
 RUN pip install \
-    dockerspawner==0.10.0 \
+    psycopg2-binary \
+    jupyter_client==6.1.12 \
+    jupyterhub-idle-culler==1.1 \
+    dockerspawner==12.1.0 \
     jupyterhub-firstuseauthenticator
-    # jhub_cas_authenticator==1.0.0
-
