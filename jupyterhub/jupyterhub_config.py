@@ -1,8 +1,8 @@
 # JupyterHub configuration
 #
-# If you update this file, do not forget to delete the `jupyterhub_data` volume before restarting the jupyterhub service:
+# If you update this file, do not forget to delete the Jupyter Hub Docker data volume before restarting the jupyterhub service:
 #
-#     docker volume rm jupyterhub_data
+#     docker volume rm hale-bopp_hub-data
 
 import os
 import sys
@@ -13,6 +13,10 @@ def construct_db_conn_string(spawner):
     username = spawner.user.name
     return f"postgres://{username}:{username}@{os.environ['POSTGRES_HOST']}:{os.environ['POSTGRES_PORT']}/{username}"
 
+
+def construct_bucket_name(spawner):
+    username = spawner.user.name
+    return f"s3://{username}"
 
 # Reference Links
 #    https://jupyterhub-dockerspawner.readthedocs.io/en/latest/api/index.html
@@ -44,10 +48,11 @@ c.DockerSpawner.extra_host_config = { 'network_mode': os.environ["DOCKER_NETWORK
 # See https://github.com/jupyterhub/dockerspawner/blob/master/examples/oauth/jupyterhub_config.py
 c.JupyterHub.hub_ip = public_ips()[0]
 
-# c.DockerSpawner.env_keep = ["DATABASE_URL"]  # This is an admin user, don't pass to notebook server
+c.DockerSpawner.env_keep = ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "BLOB_STORE_URL"]
 c.DockerSpawner.environment = {
     # database_url = os.environ["DATABASE_URL"].format(os.environ)
-    "DATABASE_URL": construct_db_conn_string
+    "DATABASE_URL": construct_db_conn_string,
+    "BLOB_STORE_BUCKET": construct_bucket_name,
 }
 
 # user data persistence
@@ -114,6 +119,21 @@ def database_init(spawner):
 
 def blobstore_init(spawner):
     username = spawner.user.name
-    pass
+    bucket_name = construct_bucket_name(spawner)
+    import boto3
+    import os
+
+    client = boto3.client(
+        's3',
+        aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+        endpoint_url=os.environ["BLOB_STORE_URL"]
+    )
+    buckets = client.list_buckets()
+    for bucket in buckets["Buckets"]:
+        if bucket["Name"] == username:
+            break
+    else:
+        client.create_bucket(Bucket=username)
 
 c.Spawner.pre_spawn_hook = hook_runner

@@ -34,6 +34,7 @@ RUN conda install --quiet --yes \
     'astropy' \
     'astroquery' \
     'awscli' \
+    'boto3' \
     'gammapy' \
     'gwcs' \
     'nodejs' \
@@ -59,6 +60,3 @@ RUN pip install \
 
 # Add conda env hook
 COPY ./conda-activate.sh /usr/local/bin/before-notebook.d/
-
-
-# docker run jupyter-scipy source /opt/conda/bin/activate base && pip freeze

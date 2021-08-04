@@ -22,6 +22,7 @@ Additionally look to the official [JupyterHub Docker Deploy](https://github.com/
 * [Keycloak]()
 * [Python]()
 * [Postgres]()
+* [Zenko CloudServer](https://s3-server.readthedocs.io/en/latest/)
 * [JupyterHub](https://jupyter.org/hub)
 
 
