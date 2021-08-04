@@ -5,9 +5,13 @@ services:
     build: jupyterhub
     image: jupyterhub_img
     container_name: jupyterhub
+    depends_on:
+      - database
+      - blob-store
+      - reverse-proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - data:/srv/jupyterhub
+      - hub-data:/srv/jupyterhub
     networks:
       - hale-bopp-network
     environment:
@@ -17,6 +21,9 @@ services:
       - HUB_IP=jupyterhub
       - HOST
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - BLOB_STORE_URL=http://blob-store:8000
+      - AWS_ACCESS_KEY_ID=$AWS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
     labels:
@@ -53,7 +60,7 @@ services:
   #     - "8888:8080"
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - keycloak_data:/srv/jupyterhub
+  #     - keycloak-data:/srv/jupyterhub
   #   environment:
   #     - KEYCLOAK_USER=admin
   #     - KEYCLOAK_PASSWORD=admin
@@ -73,38 +80,42 @@ services:
       - HOST
     volumes:
       - type: volume
-        source: database_data
+        source: database-data
         target: /var/lib/postgresql/data
     networks:
       - hale-bopp-network
 
-  # blob_store:
-  #   image: scality/s3server    #    adobe/s3mock:2.1.36
-  #   container_name: s3
-  #   environment:
-  #     - SCALITY_ACCESS_KEY_ID=$
-  #     - SCALITY_ACCESS_KEY=
-  #     - HOST
-  #   # volumes:
-  #   #   - type: volume
-  #   #     source: blob_data
-  #   #     target: /
-  #   networks:
-  #     - hale-bopp-network
-  #   ports:
-  #     - 8000:8000
+  blob-store:
+    build: blob-store
+    image: blobstore_img
+    container_name: blob-store
+    environment:
+      - ENDPOINT=blob-store
+      - REMOTE_MANAGEMENT_DISABLE=1
+      - S3BACKEND=file
+      - S3DATAPATH=/blob/data
+      - S3METADATAPATH=/blob/metadata
+      - SCALITY_ACCESS_KEY_ID=$AWS_KEY_ID
+      - SCALITY_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+      - HOST
+    volumes:
+      - type: volume
+        source: blob-data
+        target: /blob
+    networks:
+      - hale-bopp-network
+    # ports:
+    #   - 8000:8000
 
 volumes:
-  data:
+  hub-data:
     driver: local
-  lab_notebook_data:
+  keycloak-data:
     driver: local
-  keycloak_data:
+  database-data:
     driver: local
-  database_data:
+  blob-data:
     driver: local
-  # blob_data:
-  #   driver: local
 
 networks:
   hale-bopp-network:
