@@ -1,0 +1,10 @@
+--------------------------------------------------------------------------------------------
+Changelog
+---------------------------------------------------------------------------------------------
+
+8/2/21
+----------------------------------
+In docker-compose.yml, upped memory allocation.
+
+In jupyterlabs/Dockerfile, changed conda config --set channel_priority strict to flexible to fix build error in jupyterlabs. Not really sure why, but it fixed it? Obtained from this site: https://programmerah.com/solve-condas-solving-environment-failed-problem-4018/
+

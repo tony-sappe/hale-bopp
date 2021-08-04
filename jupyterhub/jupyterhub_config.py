@@ -2,7 +2,7 @@
 #
 # If you update this file, do not forget to delete the `jupyterhub_data` volume before restarting the jupyterhub service:
 #
-#     docker volume rm jupyterhub_jupyterhub_data
+#     docker volume rm hale-bopp_jupyterhub_data
 
 import os
 
@@ -10,8 +10,30 @@ import os
 c.JupyterHub.admin_access = True
 c.Spawner.default_url = "/lab"
 
-c.JupyterHub.authenticator_class = 'firstuseauthenticator.FirstUseAuthenticator'
+### Authentication per https://oauthenticator.readthedocs.io/en/stable/getting-started.html
+from oauthenticator.oauth2 import OAuthLoginHandler
+from oauthenticator.generic import GenericOAuthenticator
+from tornado.auth import OAuth2Mixin
 
+# OAuth2 endpoints
+class MyOAuthMixin(OAuth2Mixin):
+    _OAUTH_AUTHORIZE_URL = 'http://localhost:8080/auth/realms/demo/protocol/openid-connect/auth'
+    _OAUTH_ACCESS_TOKEN_URL = 'http://localhost:8080/auth/realms/jupyterhub/protocol/openid-connect'
+
+class MyOAuthLoginHandler(OAuthLoginHandler, MyOAuthMixin):
+    pass
+
+# Authenticator configuration
+class MyOAuthAuthenticator(GenericOAuthenticator):
+    login_service = 'keycloak'
+    login_handler = MyOAuthLoginHandler
+    userdata_url = 'http://localhost:8080/auth/realms/demo/protocol/openid-connect/userinfo'
+    token_url = 'http://localhost:8080/auth/realms/jupyterhub/protocol/openid-connect'
+    oauth_callback_url = 'http://localhost:8080/auth/realms/demo/protocol/openid-connect/auth'
+    client_id = 'jupyterhub'      # Your client ID and secret, as provided to you
+    client_secret = 'dfc991cf-f500-46bf-b8e9-df2716f093db'  # by the OAuth2 service.
+
+c.JupyterHub.authenticator_class = MyOAuthAuthenticator
 
 # Docker spawner
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"

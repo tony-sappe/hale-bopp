@@ -16,8 +16,8 @@ services:
       - HUB_IP=jupyterhub
       - HOST
     labels:
-      # - "traefik.enable=true"
-      - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
+      - "traefik.enable=true"
+    #   - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
     restart: on-failure
 
   jupyterlab:
@@ -26,6 +26,12 @@ services:
     container_name: jupyterlab
     network_mode: none
     command: echo
+    deploy:
+      resources:
+        limits: 
+          memory: 50M
+        reservations:
+          memory: 20M
 
   reverse-proxy:
     image: traefik:v2.4
@@ -39,6 +45,22 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: on-failure
+
+  keycloak:
+      image: quay.io/keycloak/keycloak:latest
+      environment:
+        #DB_VENDOR: POSTGRES
+        #DB_ADDR: postgres
+        #DB_DATABASE: keycloak
+        #DB_USER: keycloak
+        #DB_SCHEMA: public
+        #DB_PASSWORD: password
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: Pa55w0rd
+        # KEYCLOAK_FRONTEND_URL=http://localhost:8181/auth
+        JDBC_PARAMS: "ssl=false"
+      ports:
+        - 8081:8081
 
   # oauth2:
   #   build: oauth2
@@ -62,8 +84,9 @@ services:
     container_name: db
     environment:
       - USER=super
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=super1123
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=keycloak
       - HOST
     volumes:
       - type: volume
