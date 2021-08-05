@@ -9,6 +9,7 @@ services:
       - database
       - blob-store
       - reverse-proxy
+      - oauth2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - hub-data:/srv/jupyterhub
@@ -26,6 +27,14 @@ services:
       - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
+      - OAUTH_ACCESS_TOKEN_URL=${OAUTH_ACCESS_TOKEN_URL}
+      - OAUTH_AUTHORIZE_URL=${OAUTH_AUTHORIZE_URL}
+      - OAUTH_CALLBACK_URL=${OAUTH_CALLBACK_URL}
+      - OAUTH_CLIENT_ID=${CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=${CLIENT_SECRET}
+      - OAUTH_USERDATA_URL=${USERDATA_URL}
+      - KEYCLOAK_LOGOUT_URL=${KEYCLOAK_LOGOUT_URL}
+      - OAUTH2_USERNAME_KEY=${OAUTH2_USERNAME_KEY}
     labels:
       - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
     restart: on-failure
@@ -52,22 +61,24 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: on-failure
 
-  # oauth2:
-  #   build: oauth2
-  #   image: oauth2_img
-  #   container_name: oauth2
-  #   ports:
-  #     - "8888:8080"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - keycloak-data:/srv/jupyterhub
-  #   environment:
-  #     - KEYCLOAK_USER=admin
-  #     - KEYCLOAK_PASSWORD=admin
-  #     - HOST
-  #   labels:
-  #     - "traefik.http.routers.oauth2.rule=Host(`oauth2.docker.localhost`)"
-  #   restart: on-failure
+  oauth2:
+    build: oauth2
+    image: oauth2_img
+    container_name: oauth2
+    networks:
+      - hale-bopp-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - keycloak-data:/srv/jupyterhub
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_FRONTEND_URL=http://oauth2.docker.localhost/auth
+      - HOST
+    labels:
+      - "traefik.http.routers.oauth2.rule=Host(`oauth2.docker.localhost`)"
+      - "traefik.http.services.oauth2.loadbalancer.server.port=8080"
+    restart: on-failure
 
   database:
     image: postgres:12.7-alpine
@@ -95,8 +106,8 @@ services:
       - S3BACKEND=file
       - S3DATAPATH=/blob/data
       - S3METADATAPATH=/blob/metadata
-      - SCALITY_ACCESS_KEY_ID=$AWS_KEY_ID
-      - SCALITY_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+      - SCALITY_ACCESS_KEY_ID=${AWS_KEY_ID}
+      - SCALITY_SECRET_ACCESS_KEY=${AWS_SECRET_KEY}
       - HOST
     volumes:
       - type: volume
@@ -104,8 +115,6 @@ services:
         target: /blob
     networks:
       - hale-bopp-network
-    # ports:
-    #   - 8000:8000
 
 volumes:
   hub-data:
