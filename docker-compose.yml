@@ -63,17 +63,19 @@ services:
     build: oauth2
     image: oauth2_img
     container_name: oauth2
+    networks:
+      - hale-bopp-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - keycloak-data:/srv/jupyterhub
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
-      - KEYCLOAK_FRONTEND_URL=http://oauth2.docker.localhost:9080/auth
+      - KEYCLOAK_FRONTEND_URL=http://oauth2.docker.localhost/auth
       - HOST
     labels:
       - "traefik.http.routers.oauth2.rule=Host(`oauth2.docker.localhost`)"
-      - traefik.http.services.oauth2.loadbalancer.server.port=9080
+      - "traefik.http.services.oauth2.loadbalancer.server.port=8080"
     restart: on-failure
 
   database:
