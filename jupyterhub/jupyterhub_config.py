@@ -25,14 +25,10 @@ def construct_bucket_name(spawner):
 
 # Baseline
 c.Spawner.default_url = "/lab"
-# c.JupyterHub.db_url = os.environ["DATABASE_URL"]
 c.JupyterHub.allow_named_servers = True
 c.JupyterHub.named_server_limit_per_user = 3
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely not desirable for production
-
-# Security
-c.JupyterHub.admin_access = True
 
 # c.JupyterHub.authenticator_class = 'firstuseauthenticator.FirstUseAuthenticator'
 
@@ -41,17 +37,20 @@ from oauthenticator.oauth2 import OAuthLoginHandler
 from oauthenticator.generic import GenericOAuthenticator
 from tornado.auth import OAuth2Mixin
 
+
 # OAuth2 endpoints
 class MyOAuthMixin(OAuth2Mixin):
     _OAUTH_AUTHORIZE_URL = os.environ["OAUTH_AUTHORIZE_URL"]
     _OAUTH_ACCESS_TOKEN_URL = os.environ["OAUTH_ACCESS_TOKEN_URL"]
 
+
 class MyOAuthLoginHandler(OAuthLoginHandler, MyOAuthMixin):
     pass
 
+
 # Authenticator configuration
 class MyOAuthAuthenticator(GenericOAuthenticator):
-    login_service = 'keycloak'
+    login_service = "Keycloak SSO"
     login_handler = MyOAuthLoginHandler
     userdata_url = os.environ["OAUTH_USERDATA_URL"]
     token_url = os.environ["OAUTH_ACCESS_TOKEN_URL"]
@@ -59,8 +58,16 @@ class MyOAuthAuthenticator(GenericOAuthenticator):
     client_secret = os.environ["OAUTH_CLIENT_SECRET"]
     client_id = os.environ["OAUTH_CLIENT_ID"]
 
+
 c.JupyterHub.authenticator_class = MyOAuthAuthenticator
 
+
+# Users
+# c.Authenticator.whitelist = whitelist = set()
+# c.Authenticator.admin_users = admin = set()
+# c.Authenticator.admin_users = {"tonysappe", "admin"}
+# c.Authenticator.whitelist = {"tonysappe", "admin", "dave", "tom"}
+c.JupyterHub.admin_access = True
 
 
 # Docker Spawner
