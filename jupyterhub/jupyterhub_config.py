@@ -9,6 +9,7 @@ import sys
 
 from jupyter_client.localinterfaces import public_ips
 
+
 def construct_db_conn_string(spawner):
     username = spawner.user.name
     return f"postgres://{username}:{username}@{os.environ['POSTGRES_HOST']}:{os.environ['POSTGRES_PORT']}/{username}"
@@ -32,7 +33,35 @@ c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely no
 
 # Security
 c.JupyterHub.admin_access = True
-c.JupyterHub.authenticator_class = 'firstuseauthenticator.FirstUseAuthenticator'
+
+# c.JupyterHub.authenticator_class = 'firstuseauthenticator.FirstUseAuthenticator'
+
+### Authentication per https://oauthenticator.readthedocs.io/en/stable/getting-started.html
+from oauthenticator.oauth2 import OAuthLoginHandler
+from oauthenticator.generic import GenericOAuthenticator
+from tornado.auth import OAuth2Mixin
+
+# OAuth2 endpoints
+class MyOAuthMixin(OAuth2Mixin):
+    _OAUTH_AUTHORIZE_URL = os.environ["OAUTH_AUTHORIZE_URL"]
+    _OAUTH_ACCESS_TOKEN_URL = os.environ["OAUTH_ACCESS_TOKEN_URL"]
+
+class MyOAuthLoginHandler(OAuthLoginHandler, MyOAuthMixin):
+    pass
+
+# Authenticator configuration
+class MyOAuthAuthenticator(GenericOAuthenticator):
+    login_service = 'keycloak'
+    login_handler = MyOAuthLoginHandler
+    userdata_url = os.environ["OAUTH_USERDATA_URL"]
+    token_url = os.environ["OAUTH_ACCESS_TOKEN_URL"]
+    oauth_callback_url = os.environ["OAUTH_CALLBACK_URL"]
+    client_secret = os.environ["OAUTH_CLIENT_SECRET"]
+    client_id = os.environ["OAUTH_CLIENT_ID"]
+
+c.JupyterHub.authenticator_class = MyOAuthAuthenticator
+
+
 
 # Docker Spawner
 c.DockerSpawner.image = os.environ["DOCKER_JUPYTER_CONTAINER"]
@@ -83,6 +112,7 @@ c.JupyterHub.services = [
     },
 ]
 
+
 # Hooks
 def hook_runner(spawner):
     database_init(spawner)
@@ -119,7 +149,6 @@ def database_init(spawner):
 
 def blobstore_init(spawner):
     username = spawner.user.name
-    bucket_name = construct_bucket_name(spawner)
     import boto3
     import os
 
