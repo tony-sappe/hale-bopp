@@ -38,7 +38,7 @@ c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely not desirable for production
 
 
-### Authentication per https://oauthenticator.readthedocs.io/en/stable/getting-started.html
+# Authentication per https://oauthenticator.readthedocs.io/en/stable/getting-started.html
 class MyOAuthMixin(OAuth2Mixin):
     _OAUTH_AUTHORIZE_URL = os.environ["OAUTH_AUTHORIZE_URL"]
     _OAUTH_ACCESS_TOKEN_URL = os.environ["OAUTH_ACCESS_TOKEN_URL"]
@@ -84,11 +84,12 @@ c.KeycloakAuthenticator.keycloak_logout_url = os.environ["KEYCLOAK_LOGOUT_URL"]
 
 
 # Users
-# c.Authenticator.whitelist = whitelist = set()
-# c.Authenticator.admin_users = admin = set()
-# c.Authenticator.admin_users = {"tonysappe", "admin"}
-# c.Authenticator.whitelist = {"tonysappe", "admin", "dave", "tom"}
+c.Authenticator.whitelist = set()
+c.Authenticator.admin_users = {"admin"}
 c.JupyterHub.admin_access = True
+
+# Database Connection
+# c.JupyterHub.db_url = f"postgresql://{os.environ['DATABASE_URL']}"
 
 
 # Docker Spawner
