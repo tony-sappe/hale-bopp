@@ -78,8 +78,6 @@ services:
     labels:
       - "traefik.http.routers.oauth2.rule=Host(`oauth2.docker.localhost`)"
       - "traefik.http.services.oauth2.loadbalancer.server.port=8080"
-      # - "traefik.http.services.oauth2.loadbalancer.server.port=9080"
-      # - "traefik.http.services.oauth2.loadbalancer.server.port=9990"
     restart: on-failure
 
   database:

@@ -8,9 +8,12 @@ import os
 import sys
 
 from jupyter_client.localinterfaces import public_ips
-
-# class c:
-#     pass
+from jupyterhub.handlers.login import LogoutHandler
+from oauthenticator.generic import GenericOAuthenticator
+from oauthenticator.oauth2 import OAuthLoginHandler
+from tornado.auth import OAuth2Mixin
+from tornado.httputil import url_concat
+from traitlets import Unicode
 
 
 def construct_db_conn_string(spawner):
@@ -34,18 +37,8 @@ c.JupyterHub.named_server_limit_per_user = 3
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely not desirable for production
 
-# c.JupyterHub.authenticator_class = 'firstuseauthenticator.FirstUseAuthenticator'
 
 ### Authentication per https://oauthenticator.readthedocs.io/en/stable/getting-started.html
-from jupyterhub.handlers.login import LogoutHandler
-from jupyterhub.utils import url_path_join
-from oauthenticator.generic import GenericOAuthenticator
-from oauthenticator.oauth2 import OAuthLoginHandler
-from tornado.auth import OAuth2Mixin
-from tornado.httputil import url_concat
-from traitlets import Unicode
-
-# OAuth2 endpoints
 class MyOAuthMixin(OAuth2Mixin):
     _OAUTH_AUTHORIZE_URL = os.environ["OAUTH_AUTHORIZE_URL"]
     _OAUTH_ACCESS_TOKEN_URL = os.environ["OAUTH_ACCESS_TOKEN_URL"]
@@ -68,7 +61,6 @@ class KeycloakLogoutHandler(LogoutHandler):
         )
 
 
-# Authenticator configuration
 class KeycloakAuthenticator(GenericOAuthenticator):
     login_service = "Keycloak SSO"
     login_handler = MyOAuthLoginHandler
