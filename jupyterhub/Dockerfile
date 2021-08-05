@@ -11,4 +11,5 @@ RUN pip install \
     jupyterhub-idle-culler==1.1 \
     dockerspawner==12.1.0 \
     oauthenticator==0.8.0
+    # 14.1.0
     # jupyterhub-firstuseauthenticator

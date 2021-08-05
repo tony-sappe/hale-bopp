@@ -33,6 +33,8 @@ services:
       - OAUTH_CLIENT_ID=${CLIENT_ID}
       - OAUTH_CLIENT_SECRET=${CLIENT_SECRET}
       - OAUTH_USERDATA_URL=${USERDATA_URL}
+      - KEYCLOAK_LOGOUT_URL=${KEYCLOAK_LOGOUT_URL}
+      - OAUTH2_USERNAME_KEY=${OAUTH2_USERNAME_KEY}
     labels:
       - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
     restart: on-failure
