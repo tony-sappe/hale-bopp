@@ -18,7 +18,7 @@ from tornado.auth import OAuth2Mixin
 # OAuth2 endpoints
 class MyOAuthMixin(OAuth2Mixin):
     _OAUTH_AUTHORIZE_URL = 'http://localhost:8888/auth/realms/jupyterhub/protocol/openid-connect/auth'
-    _OAUTH_ACCESS_TOKEN_URL = 'http://localhost:8888/auth/realms/jupyterhub/protocol/openid-connect'
+    _OAUTH_ACCESS_TOKEN_URL = 'http://localhost:8888/auth/realms/jupyterhub/protocol/openid-connect/token'
 
 class MyOAuthLoginHandler(OAuthLoginHandler, MyOAuthMixin):
     pass
@@ -28,10 +28,10 @@ class MyOAuthAuthenticator(GenericOAuthenticator):
     login_service = 'keycloak'
     login_handler = MyOAuthLoginHandler
     userdata_url = 'http://localhost:8888/auth/realms/jupyterhub/protocol/openid-connect/userinfo'
-    token_url = 'http://localhost:8888/auth/realms/jupyterhub/protocol/openid-connect'
-    oauth_callback_url = 'http://localhost:8888/auth/realms/jupyterhub/protocol/openid-connect/auth'
-    client_id = 'jupyterhub'      # Your client ID and secret, as provided to you
+    token_url = 'http://localhost:8888/auth/realms/jupyterhub/protocol/openid-connect/token'
+    oauth_callback_url = 'http://jupyter.docker.localhost/hub/oauth_callback'
     client_secret = '181504b4-fc17-486f-8023-be5759d4e3d6'
+    client_id = 'jupyterhub'
 
 c.JupyterHub.authenticator_class = MyOAuthAuthenticator
 

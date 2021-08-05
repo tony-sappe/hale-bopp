@@ -39,6 +39,23 @@
   "requiredCredentials": [
     "password"
   ],
+  "users" : [
+        {
+            "username" : "reese",
+            "enabled": true,
+            "email" : "sample-user@example",
+            "firstName": "Sample",
+            "lastName": "User",
+            "credentials" : [
+                { "type" : "password",
+                  "value" : "pass" }
+            ],
+            "realmRoles": [ "user" ],
+            "clientRoles": {
+                "account": ["view-profile", "manage-account"]
+            }
+        }
+    ],
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyInitialCounter": 0,

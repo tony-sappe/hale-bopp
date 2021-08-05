@@ -8,13 +8,16 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - jupyterhub_data:/srv/jupyterhub
-    # networks:
-    #   - default
+    networks:
+      - hale-bopp-network
     environment:
       - DOCKER_JUPYTER_CONTAINER=jupyterlab_img
       - DOCKER_NETWORK_NAME=${COMPOSE_PROJECT_NAME}_default
       - HUB_IP=jupyterhub
       - HOST
+      - OAUTH_CALLBACK_URL=http://jupyter.docker.localhost/hub/oauth_callback //add
+      - OAUTH_CLIENT_ID=jupyterhub     //add
+      - OAUTH_CLIENT_SECRET=181504b4-fc17-486f-8023-be5759d4e3d6 //add
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
@@ -36,8 +39,8 @@ services:
   reverse-proxy:
     image: traefik:v2.4
     container_name: reverse_proxy
-    # networks:
-    #   - default
+    networks:
+      - hale-bopp-network
     command: --api.insecure=true --providers.docker
     ports:
       - "80:80"
@@ -84,8 +87,8 @@ services:
       - type: volume
         source: database_data
         target: /var/lib/postgresql/data
-    # networks:
-    #   - backend
+    networks:
+      - hale-bopp-network
 
 
 volumes:
@@ -96,9 +99,5 @@ volumes:
   database_data:
     driver: local
 
-# networks:
-#   default:
-#     external: true
-#     name: jupyterhub-traefik-net
-#   backend:
-#     external: false
+networks:
+  hale-bopp-network:
