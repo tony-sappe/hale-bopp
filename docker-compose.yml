@@ -11,8 +11,9 @@ services:
       - reverse-proxy
       - oauth2
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}/jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
       - hub-data:/srv/jupyterhub
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - hale-bopp-network
     environment:
@@ -26,13 +27,13 @@ services:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - KEYCLOAK_LOGOUT_URL
+      - OAUTH2_AUTHORIZE_URL
+      - OAUTH2_TOKEN_URL
       - OAUTH2_USERNAME_KEY
-      - OAUTH_ACCESS_TOKEN_URL
-      - OAUTH_AUTHORIZE_URL
       - OAUTH_CALLBACK_URL
       - OAUTH_CLIENT_ID
       - OAUTH_CLIENT_SECRET
-      - OAUTH_USERDATA_URL
+      - OAUTH2_USERDATA_URL
       - POSTGRES_HOST
       - POSTGRES_PORT
     labels:
@@ -95,6 +96,7 @@ services:
         target: /var/lib/postgresql/data
     networks:
       - hale-bopp-network
+    restart: on-failure
 
   blob-store:
     build: blob-store
@@ -115,6 +117,7 @@ services:
         target: /blob
     networks:
       - hale-bopp-network
+    restart: on-failure
 
 volumes:
   hub-data:

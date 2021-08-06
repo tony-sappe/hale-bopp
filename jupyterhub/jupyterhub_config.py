@@ -1,8 +1,8 @@
 # JupyterHub configuration
 #
-# If you update this file, do not forget to delete the Jupyter Hub Docker data volume before restarting the jupyterhub service:
+# If you update this file, do not forget to delete the JupyterHub Docker container before restarting the service:
 #
-#     docker volume rm hale-bopp_hub-data
+#     docker rm jupyterhub
 
 import os
 import sys
@@ -10,8 +10,6 @@ import sys
 from jupyter_client.localinterfaces import public_ips
 from jupyterhub.handlers.login import LogoutHandler
 from oauthenticator.generic import GenericOAuthenticator
-from oauthenticator.oauth2 import OAuthLoginHandler
-from tornado.auth import OAuth2Mixin
 from tornado.httputil import url_concat
 from traitlets import Unicode
 
@@ -38,16 +36,6 @@ c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely not desirable for production
 
 
-# Authentication per https://oauthenticator.readthedocs.io/en/stable/getting-started.html
-class MyOAuthMixin(OAuth2Mixin):
-    _OAUTH_AUTHORIZE_URL = os.environ["OAUTH_AUTHORIZE_URL"]
-    _OAUTH_ACCESS_TOKEN_URL = os.environ["OAUTH_ACCESS_TOKEN_URL"]
-
-
-class MyOAuthLoginHandler(OAuthLoginHandler, MyOAuthMixin):
-    pass
-
-
 class KeycloakLogoutHandler(LogoutHandler):
     """Logout handler for keycloak"""
 
@@ -63,14 +51,9 @@ class KeycloakLogoutHandler(LogoutHandler):
 
 class KeycloakAuthenticator(GenericOAuthenticator):
     login_service = "Keycloak SSO"
-    login_handler = MyOAuthLoginHandler
-    userdata_url = os.environ["OAUTH_USERDATA_URL"]
-    token_url = os.environ["OAUTH_ACCESS_TOKEN_URL"]
-    oauth_callback_url = os.environ["OAUTH_CALLBACK_URL"]
-    client_secret = os.environ["OAUTH_CLIENT_SECRET"]
-    client_id = os.environ["OAUTH_CLIENT_ID"]
+    userdata_url = os.environ["OAUTH2_USERDATA_URL"]
 
-    keycloak_logout_url = Unicode(
+    logout_redirect_url = Unicode(
         config=True,
         help="The keycloak logout URL"
     )
@@ -80,7 +63,7 @@ class KeycloakAuthenticator(GenericOAuthenticator):
 
 
 c.JupyterHub.authenticator_class = KeycloakAuthenticator
-c.KeycloakAuthenticator.keycloak_logout_url = os.environ["KEYCLOAK_LOGOUT_URL"]
+c.KeycloakAuthenticator.logout_redirect_url = os.environ["KEYCLOAK_LOGOUT_URL"]
 
 
 # Users
