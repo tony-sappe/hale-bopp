@@ -1,6 +1,6 @@
 {
-  "id": "jupyterhub",
-  "realm": "jupyterhub",
+  "id": "hale-bopp",
+  "realm": "hale-bopp",
   "notBefore": 0,
   "revokeRefreshToken": false,
   "refreshTokenMaxReuse": 0,
@@ -77,7 +77,7 @@
   "clients": [
     {
       "id": "3c776167-01b1-46b9-b074-933224557e3d",
-      "clientId": "jupyterhub",
+      "clientId": "hale-bopp",
       "rootUrl": "https://jupyter.docker.localhost",
       "adminUrl": "https://jupyter.docker.localhost",
       "surrogateAuthRequired": false,

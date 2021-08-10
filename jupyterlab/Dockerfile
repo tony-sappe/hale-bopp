@@ -1,11 +1,11 @@
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-scipy-notebook
-FROM jupyter/scipy-notebook:f9c990eb6295
 
-LABEL maintainer="Tony Sappe"
+# JupyterLab 3.0.16
+# Python 3.7.10
+FROM jupyter/scipy-notebook:f9c990eb6295
 
 USER root
 
-# APT packages
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
@@ -23,36 +23,40 @@ RUN apt-get update \
 
 USER $NB_UID
 
-# Astrophysics Conda packages
+# Science Platform Conda packages
 
 RUN conda config --add channels conda-forge \
-  && conda config --set channel_priority flexible
+  && conda config --set channel_priority strict
 
 RUN conda update -n base conda
 RUN conda update --all
 RUN conda install --quiet --yes \
     'astropy' \
     'astroquery' \
+    'awscli' \
+    'boto3' \
     'gammapy' \
     'gwcs' \
-    'matplotlib' \
+    'nodejs' \
     'photutils' \
+    'psycopg2' \
+    'pyspark' \
     'pyvo' \
     'reproject' \
     'specutils' \
-    'vaex'
+    'vaex' \
+    'jupyterhub==1.4.2'
 RUN conda clean --all --yes \
     && fix-permissions $CONDA_DIR
 
-ENV CPATH=$CONDA_DIR/include
+ENV CPATH=$CONDA_DIR/include \
+    JAVA_HOME=/usr/bin/java
 
 RUN pip install \
     pari_jupyter \
+    jupyterlab-sql \
     scilab-kernel \
     && fix-permissions $CONDA_DIR
 
 # Add conda env hook
 COPY ./conda-activate.sh /usr/local/bin/before-notebook.d/
-
-
-# docker run jupyter-scipy source /opt/conda/bin/activate base && pip freeze
