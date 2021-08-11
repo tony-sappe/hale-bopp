@@ -6,12 +6,14 @@
 
 import os
 import sys
+import urllib
 
 from jupyter_client.localinterfaces import public_ips
 from jupyterhub.handlers.login import LogoutHandler
 from oauthenticator.generic import GenericOAuthenticator
 from tornado.httputil import url_concat
 from traitlets import Unicode
+from tornado import gen
 
 
 def construct_db_conn_string(spawner):
@@ -21,7 +23,7 @@ def construct_db_conn_string(spawner):
 
 def construct_bucket_name(spawner):
     username = spawner.user.name
-    return f"s3://{username}"
+    return f"{username}"
 
 # Reference Links
 #    https://jupyterhub-dockerspawner.readthedocs.io/en/latest/api/index.html
@@ -36,17 +38,31 @@ c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely not desirable for production
 
 
-class KeycloakLogoutHandler(LogoutHandler):
-    """Logout handler for keycloak"""
+# class KeycloakLogoutHandler(LogoutHandler):
+#     """Logout handler for keycloak"""
 
-    async def render_logout_page(self):
-        params = {
-            "redirect_uri": f"{self.request.protocol}://{self.request.host}{self.hub.server.base_url}"
-        }
-        self.redirect(
-            url_concat(self.authenticator.keycloak_logout_url, params),
-            permanent=False
-        )
+#     async def render_logout_page(self):
+#         params = {
+#             "redirect_uri": f"{self.request.protocol}://{self.request.host}{self.hub.server.base_url}"
+#         }
+#         self.redirect(
+#             url_concat(self.authenticator.keycloak_logout_url, params),
+#             permanent=False
+#         )
+
+class KeycloakLogoutHandler(LogoutHandler):
+    kc_logout_url = os.environ["KEYCLOAK_LOGOUT_URL"]
+
+    @gen.coroutine
+    def get(self):
+        # redirect to keycloak logout url and redirect back with kc=true parameters
+        # then proceed with the original logout method.
+        logout_kc = self.get_argument('kc', '')
+        if logout_kc != 'true':
+            logout_url = self.request.full_url() + '?kc=true'
+            self.redirect(self.kc_logout_url + '?' + urllib.parse.urlencode({'redirect_uri': logout_url}))
+        else:
+            super().get()
 
 
 class KeycloakAuthenticator(GenericOAuthenticator):
