@@ -71,6 +71,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - keycloak-data:/srv/jupyterhub
+      - ${PWD}/oauth2/realm.json:/opt/jboss/keycloak/realm.json
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin

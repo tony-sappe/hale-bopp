@@ -11,7 +11,6 @@ ENV KEYCLOAK_PASSWORD admin
 
 USER root
 RUN mkdir -p /home/resources/keycloak/
-COPY realm.json /opt/jboss/keycloak/
 
 # Sets up a realm with id "jupyterhub" in keycloak.
 CMD ["-b 0.0.0.0", "-Dkeycloak.profile.feature.upload_scripts=enabled", "-Dkeycloak.import=/opt/jboss/keycloak/realm.json"]

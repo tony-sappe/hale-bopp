@@ -6,14 +6,9 @@
 
 import os
 import sys
-import urllib
 
 from jupyter_client.localinterfaces import public_ips
-from jupyterhub.handlers.login import LogoutHandler
 from oauthenticator.generic import GenericOAuthenticator
-from tornado.httputil import url_concat
-from traitlets import Unicode
-from tornado import gen
 
 
 def construct_db_conn_string(spawner):
@@ -38,48 +33,13 @@ c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely not desirable for production
 
 
-# class KeycloakLogoutHandler(LogoutHandler):
-#     """Logout handler for keycloak"""
-
-#     async def render_logout_page(self):
-#         params = {
-#             "redirect_uri": f"{self.request.protocol}://{self.request.host}{self.hub.server.base_url}"
-#         }
-#         self.redirect(
-#             url_concat(self.authenticator.keycloak_logout_url, params),
-#             permanent=False
-#         )
-
-class KeycloakLogoutHandler(LogoutHandler):
-    kc_logout_url = os.environ["KEYCLOAK_LOGOUT_URL"]
-
-    @gen.coroutine
-    def get(self):
-        # redirect to keycloak logout url and redirect back with kc=true parameters
-        # then proceed with the original logout method.
-        logout_kc = self.get_argument('kc', '')
-        if logout_kc != 'true':
-            logout_url = self.request.full_url() + '?kc=true'
-            self.redirect(self.kc_logout_url + '?' + urllib.parse.urlencode({'redirect_uri': logout_url}))
-        else:
-            super().get()
-
 
 class KeycloakAuthenticator(GenericOAuthenticator):
     login_service = "Keycloak SSO"
     userdata_url = os.environ["OAUTH2_USERDATA_URL"]
 
-    logout_redirect_url = Unicode(
-        config=True,
-        help="The keycloak logout URL"
-    )
-
-    def get_handlers(self, app):
-        return super().get_handlers(app) + [(r'/logout', KeycloakLogoutHandler)]
-
 
 c.JupyterHub.authenticator_class = KeycloakAuthenticator
-c.KeycloakAuthenticator.logout_redirect_url = os.environ["KEYCLOAK_LOGOUT_URL"]
 
 
 # Users
