@@ -87,6 +87,7 @@ Then navigate to [jupyterhub.docker.localhost](http://jupyterhub.docker.localhos
 ### Pre-configured Accounts
 
 Jupyterhub can be accessed by either registering a new user or using `super`:`super1123` to quickly access a user space
+
 Keycloak has the following administrator: `admin`:`admin`
 
 ## Stop
@@ -98,10 +99,10 @@ docker-compose down
 ## More Resources
 
 Creating this project was a labor of love. While it didn't take an obscene
-amount of time, the main frustration revolved was the constant hunt for
-reference documents and examples from other successful projects. In no
-particular order I'll provide links to additional content and resources which
-helped put all of the pieces together.
+amount of time, the main frustration was the constant hunt for reference
+documents and examples from other successful projects. Links to additional
+content and resources which helped put all of the pieces together are below in
+no particular order.
 
 | Link | Content |
 | --- |:--- |
