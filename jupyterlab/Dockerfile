@@ -10,13 +10,14 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
     fonts-dejavu \
-    tzdata \
-    gfortran \
     gcc \
-    scilab \
-    pari-gp \
-    libpari-dev \
+    gfortran \
     libgmp-dev \
+    libpari-dev \
+    pari-gp \
+    scilab \
+    tzdata \
+    wget \
     && apt-get autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -36,7 +37,9 @@ RUN conda install --quiet --yes \
     'awscli' \
     'boto3' \
     'gammapy' \
+    'gatspy' \
     'gwcs' \
+    'jupyterhub==1.4.2' \
     'nodejs' \
     'photutils' \
     'psycopg2' \
@@ -44,8 +47,7 @@ RUN conda install --quiet --yes \
     'pyvo' \
     'reproject' \
     'specutils' \
-    'vaex' \
-    'jupyterhub==1.4.2'
+    'vaex'
 RUN conda clean --all --yes \
     && fix-permissions $CONDA_DIR
 
