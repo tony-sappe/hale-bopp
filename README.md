@@ -84,6 +84,11 @@ docker-compose up -d
 Then navigate to [jupyterhub.docker.localhost](http://jupyterhub.docker.localhost/)
 (Google Chrome might work better than other browsers, YMMV)
 
+### Pre-configured Accounts
+
+Jupyterhub can be accessed by either registering a new user or using `super`:`super1123` to quickly access a user space
+Keycloak has the following administrator: `admin`:`admin`
+
 ## Stop
 
 ```

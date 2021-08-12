@@ -19,7 +19,7 @@ services:
     environment:
       - BLOB_STORE_URL=http://blob-store:8000
       - CONTAINER_IDLE_TIMEOUT=600
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${JUPYTERHUB_DB}
       - DOCKER_JUPYTER_CONTAINER=jupyterlab_img
       - DOCKER_NETWORK_NAME=hale-bopp-network
       - HUB_IP=jupyterhub
@@ -66,16 +66,22 @@ services:
     build: oauth2
     image: oauth2_img
     container_name: oauth2
+    depends_on:
+      - database
     networks:
       - hale-bopp-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - keycloak-data:/srv/jupyterhub
       - ${PWD}/oauth2/realm.json:/opt/jboss/keycloak/realm.json
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
       - KEYCLOAK_FRONTEND_URL=http://oauth2.docker.localhost/auth
+      - DB_VENDOR=postgres
+      - DB_ADDR=db
+      - DB_DATABASE=${KEYCLOAK_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
       - HOST
     labels:
       - "traefik.http.routers.oauth2.rule=Host(`oauth2.docker.localhost`)"
@@ -86,15 +92,17 @@ services:
     image: postgres:12.7-alpine
     container_name: db
     environment:
-      - USER=${POSTGRES_USER}
+      # - USER=${POSTGRES_USER}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      # - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_MULTIPLE_DATABASES=${POSTGRES_DB},${KEYCLOAK_DB},${JUPYTERHUB_DB}
       - HOST
     volumes:
       - type: volume
         source: database-data
         target: /var/lib/postgresql/data
+      - ${PWD}/database/create-multiple-postgres-databases.sh:/docker-entrypoint-initdb.d/multi-db.sh
     networks:
       - hale-bopp-network
     restart: on-failure
@@ -122,8 +130,6 @@ services:
 
 volumes:
   hub-data:
-    driver: local
-  keycloak-data:
     driver: local
   database-data:
     driver: local
