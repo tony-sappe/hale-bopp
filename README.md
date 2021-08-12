@@ -90,7 +90,27 @@ Then navigate to [jupyterhub.docker.localhost](http://jupyterhub.docker.localhos
 docker-compose down
 ```
 
-## More
+## More Resources
 
-Read the [Docker Compose manual](https://docs.docker.com/compose/) to
-learn how to manage your application.
+Creating this project was a labor of love. While it didn't take an obscene
+amount of time, the main frustration revolved was the constant hunt for
+reference documents and examples from other successful projects. In no
+particular order I'll provide links to additional content and resources which
+helped put all of the pieces together.
+
+| Link | Content |
+| --- |:--- |
+| [CloudServer Docker hub](https://hub.docker.com/r/zenko/cloudserver/) | Docker images and README|
+| [CloudServer Read the Docs](https://s3-server.readthedocs.io/en/latest/DOCKER.html) | Goldmine of CloudServer documentation under previous name of S3-Server |
+| [CloudServer Github](https://github.com/scality/cloudserver) | CloudServer code in case you need to dig deeper |
+| [DockerSpawner Read the Docs](https://jupyterhub-dockerspawner.readthedocs.io/en/latest/api/index.html#dockerspawner) | DockerSpawner docs (fun to debug!) |
+| [DockerSpawner Github](https://github.com/jupyterhub/jupyterhub/wiki/Spawners) | DockerSpawner details |
+| [JupyterHub Docker](https://github.com/jupyterhub/jupyterhub-deploy-docker) | Official reference deployment of JupyterHub with Docker |
+| [JupyterHub Oauth issue thread](https://github.com/jupyterhub/oauthenticator/issues/107) | Long and confusing thread. Valuable insights to understand some issues |
+| [JupyterHub Read the Docs](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html) | So much content here |
+| [JupyterHub SciPy Notebooks](https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-scipy-notebook) | If you want to start with a different JupyterLab flavor, look here |
+| [JupyterHub Vienna DS Group](https://github.com/viennadatasciencegroup/jupyterhub) | Another hosted JupyterHub project |
+| [Keycloak blog post](https://gruchalski.com/posts/2020-09-03-keycloak-with-docker-compose/) | Keycloak and docker-compose |
+| [Keycloak Medium post](https://migueldoctor.medium.com/run-keycloak-locally-using-docker-and-secure-your-apps-in-3-steps-f6c554427e54) | Keycloak running in Docker |
+| [Traefik Quick Start](https://doc.traefik.io/traefik/getting-started/quick-start/) | This is really all you probably need to get Traefik working |
+| [Traefik Routing](https://doc.traefik.io/traefik/routing/providers/docker/) | If you need more details on Traefik, it's probably the routing |

@@ -11,30 +11,31 @@ services:
       - reverse-proxy
       - oauth2
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}/jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
       - hub-data:/srv/jupyterhub
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - hale-bopp-network
     environment:
+      - BLOB_STORE_URL=http://blob-store:8000
+      - CONTAINER_IDLE_TIMEOUT=600
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       - DOCKER_JUPYTER_CONTAINER=jupyterlab_img
       - DOCKER_NETWORK_NAME=hale-bopp-network
-      - CONTAINER_IDLE_TIMEOUT=600
       - HUB_IP=jupyterhub
       - HOST
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      - BLOB_STORE_URL=http://blob-store:8000
-      - AWS_ACCESS_KEY_ID=$AWS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - OAUTH_ACCESS_TOKEN_URL=${OAUTH_ACCESS_TOKEN_URL}
-      - OAUTH_AUTHORIZE_URL=${OAUTH_AUTHORIZE_URL}
-      - OAUTH_CALLBACK_URL=${OAUTH_CALLBACK_URL}
-      - OAUTH_CLIENT_ID=${CLIENT_ID}
-      - OAUTH_CLIENT_SECRET=${CLIENT_SECRET}
-      - OAUTH_USERDATA_URL=${USERDATA_URL}
-      - KEYCLOAK_LOGOUT_URL=${KEYCLOAK_LOGOUT_URL}
-      - OAUTH2_USERNAME_KEY=${OAUTH2_USERNAME_KEY}
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - KEYCLOAK_LOGOUT_URL
+      - OAUTH2_AUTHORIZE_URL
+      - OAUTH2_TOKEN_URL
+      - OAUTH2_USERNAME_KEY
+      - OAUTH_CALLBACK_URL
+      - OAUTH_CLIENT_ID
+      - OAUTH_CLIENT_SECRET
+      - OAUTH2_USERDATA_URL
+      - POSTGRES_HOST
+      - POSTGRES_PORT
     labels:
       - "traefik.http.routers.jupyterhub.rule=Host(`jupyterhub.docker.localhost`)"
     restart: on-failure
@@ -70,6 +71,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - keycloak-data:/srv/jupyterhub
+      - ${PWD}/oauth2/realm.json:/opt/jboss/keycloak/realm.json
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
@@ -95,6 +97,7 @@ services:
         target: /var/lib/postgresql/data
     networks:
       - hale-bopp-network
+    restart: on-failure
 
   blob-store:
     build: blob-store
@@ -106,8 +109,8 @@ services:
       - S3BACKEND=file
       - S3DATAPATH=/blob/data
       - S3METADATAPATH=/blob/metadata
-      - SCALITY_ACCESS_KEY_ID=${AWS_KEY_ID}
-      - SCALITY_SECRET_ACCESS_KEY=${AWS_SECRET_KEY}
+      - SCALITY_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - SCALITY_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - HOST
     volumes:
       - type: volume
@@ -115,6 +118,7 @@ services:
         target: /blob
     networks:
       - hale-bopp-network
+    restart: on-failure
 
 volumes:
   hub-data:

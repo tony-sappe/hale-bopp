@@ -1,19 +1,14 @@
 # JupyterHub configuration
 #
-# If you update this file, do not forget to delete the Jupyter Hub Docker data volume before restarting the jupyterhub service:
+# If you update this file, do not forget to delete the JupyterHub Docker container before restarting the service:
 #
-#     docker volume rm hale-bopp_hub-data
+#     docker rm jupyterhub
 
 import os
 import sys
 
 from jupyter_client.localinterfaces import public_ips
-from jupyterhub.handlers.login import LogoutHandler
 from oauthenticator.generic import GenericOAuthenticator
-from oauthenticator.oauth2 import OAuthLoginHandler
-from tornado.auth import OAuth2Mixin
-from tornado.httputil import url_concat
-from traitlets import Unicode
 
 
 def construct_db_conn_string(spawner):
@@ -23,7 +18,7 @@ def construct_db_conn_string(spawner):
 
 def construct_bucket_name(spawner):
     username = spawner.user.name
-    return f"s3://{username}"
+    return f"{username}"
 
 # Reference Links
 #    https://jupyterhub-dockerspawner.readthedocs.io/en/latest/api/index.html
@@ -38,57 +33,22 @@ c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.JupyterHub.shutdown_on_logout = True  # Good for demo purposes. Most likely not desirable for production
 
 
-### Authentication per https://oauthenticator.readthedocs.io/en/stable/getting-started.html
-class MyOAuthMixin(OAuth2Mixin):
-    _OAUTH_AUTHORIZE_URL = os.environ["OAUTH_AUTHORIZE_URL"]
-    _OAUTH_ACCESS_TOKEN_URL = os.environ["OAUTH_ACCESS_TOKEN_URL"]
-
-
-class MyOAuthLoginHandler(OAuthLoginHandler, MyOAuthMixin):
-    pass
-
-
-class KeycloakLogoutHandler(LogoutHandler):
-    """Logout handler for keycloak"""
-
-    async def render_logout_page(self):
-        params = {
-            "redirect_uri": f"{self.request.protocol}://{self.request.host}{self.hub.server.base_url}"
-        }
-        self.redirect(
-            url_concat(self.authenticator.keycloak_logout_url, params),
-            permanent=False
-        )
-
 
 class KeycloakAuthenticator(GenericOAuthenticator):
     login_service = "Keycloak SSO"
-    login_handler = MyOAuthLoginHandler
-    userdata_url = os.environ["OAUTH_USERDATA_URL"]
-    token_url = os.environ["OAUTH_ACCESS_TOKEN_URL"]
-    oauth_callback_url = os.environ["OAUTH_CALLBACK_URL"]
-    client_secret = os.environ["OAUTH_CLIENT_SECRET"]
-    client_id = os.environ["OAUTH_CLIENT_ID"]
-
-    keycloak_logout_url = Unicode(
-        config=True,
-        help="The keycloak logout URL"
-    )
-
-    def get_handlers(self, app):
-        return super().get_handlers(app) + [(r'/logout', KeycloakLogoutHandler)]
+    userdata_url = os.environ["OAUTH2_USERDATA_URL"]
 
 
 c.JupyterHub.authenticator_class = KeycloakAuthenticator
-c.KeycloakAuthenticator.keycloak_logout_url = os.environ["KEYCLOAK_LOGOUT_URL"]
 
 
 # Users
-# c.Authenticator.whitelist = whitelist = set()
-# c.Authenticator.admin_users = admin = set()
-# c.Authenticator.admin_users = {"tonysappe", "admin"}
-# c.Authenticator.whitelist = {"tonysappe", "admin", "dave", "tom"}
+c.Authenticator.whitelist = set()
+c.Authenticator.admin_users = {"admin"}
 c.JupyterHub.admin_access = True
+
+# Database Connection
+# c.JupyterHub.db_url = f"postgresql://{os.environ['DATABASE_URL']}"
 
 
 # Docker Spawner
