@@ -1,4 +1,4 @@
-# Quasi-Enterprise JupyterHub Deployment
+# Semi-Enterprise JupyterHub Deployment
 
 Welcome to a small project that enables an aspiring person to run a
 "Science Platform" suitable for astrophysics research. This might be overkill
