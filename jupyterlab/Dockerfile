@@ -32,6 +32,7 @@ RUN conda config --add channels conda-forge \
 RUN conda update -n base conda
 RUN conda update --all
 RUN conda install --quiet --yes \
+    'aplpy' \
     'astropy' \
     'astroquery' \
     'awscli' \
